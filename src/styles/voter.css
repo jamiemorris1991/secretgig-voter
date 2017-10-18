@@ -1,14 +1,37 @@
-.option {
-    background: #fff;
-    border: 1px solid #999;
-    font-size: 24px;
+.option,
+.optionA,
+.optionB {
+    background: #555;
+    border: 1px solid #222;
+    color: white;
+    font-size: 74px;
     font-weight: bold;
     line-height: 68px;
-    height: 68px;
+    height: 600px;
     margin-right: -1px;
     margin-top: -1px;
     padding: 0;
     text-align: center;
-    width: 170px;
+    width: 50%;
     position: relative;
+    float: left;
+    border-radius: 10px;
   }
+
+.option:hover,
+.optionA:hover,
+.optionB:hover {
+  filter: brightness(150%);
+}
+.optionA {
+  background-color: darkgreen;
+}
+
+.optionB {
+  background-color: darkred;
+}
+
+.clock {
+  clear: both;
+  margin-left: -40%;
+}
