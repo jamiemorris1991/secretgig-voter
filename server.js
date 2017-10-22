@@ -1,65 +1,71 @@
-var express = require("express");
-var bodyParser = require("body-parser");
-var mongodb = require("mongodb");
-var ObjectID = mongodb.ObjectID;
+//server.js
+'use strict'
+//first we import our dependencies…
+var express = require('express');
+var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
+var Vote = require('./model/votes')
 
-var uri = 'mongodb://heroku:seven@ds227035.mlab.com:27035/secretgig-votes'
-var VOTES_COLLECTION = "votes";
-
+//and create our instances
 var app = express();
+var router = express.Router();
+//set our port to either a predetermined port number if you have set 
+//it up, or 3001
+var port = 3001;
+
+//db config
+var mongoDB = 'mongodb://heroku:seven@ds227035.mlab.com:27035/secretgig-votes';
+mongoose.connect(mongoDB, { useMongoClient: true })
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+//now we should configure the API to use bodyParser and look for 
+//JSON data in the request body
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+//To prevent errors from Cross Origin Resource Sharing, we will set 
+//our headers to allow CORS with middleware like so:
+app.use(function(req, res, next) {
+ res.setHeader('Access-Control-Allow-Origin', '*');
+ res.setHeader('Access-Control-Allow-Credentials', 'true');
+ res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
+ res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
+//and remove cacheing so we get the most recent votes
+ res.setHeader('Cache-Control', 'no-cache');
+ next();
+});
+//now we can set the route path & initialize the API
+router.get('/', function(req, res) {
+ res.json({ message: 'API Initialized!'});
+});
 
-// Create a database variable outside of the database connection callback to reuse the connection pool in your app.
-var db;
-
-// Connect to the database before starting the application server.
-// mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
-mongodb.MongoClient.connect(uri, function (err, database) {
-  if (err) {
-    console.log(err);
-    process.exit(1);
-  }
-
-  // Save database object from the callback for reuse.
-  db = database;
-  console.log("Database connection ready");
-
-  // Initialize the app.
-  var server = app.listen(process.env.PORT || 8080, function () {
-    var port = server.address().port;
-    console.log("App now running on port", port);
+router.route('/votes')
+.get(function(req, res) {
+  Vote.find(function(err, votes) {
+    if (err)
+      res.send(err);
+    res.json(votes)
+  });
+})
+.post(function(req, res) {
+  var vote = new Vote();
+  vote.optionA  = req.body.optionA;
+  vote.OptionB  = req.body.OptionB;
+  vote.votesForA  = req.body.votesForA;
+  vote.votesForB  = req.body.votesForB;
+  vote.start  = req.body.start;
+  vote.duration  = req.body.duration;
+  vote.save(function(err) {
+    if (err)
+      res.send(err);
+    res.json({ message: 'Vote successfully added!' });
   });
 });
 
-// CONTACTS API ROUTES BELOW
-function handleError(res, reason, message, code) {
-  console.log("ERROR: " + reason);
-  res.status(code || 500).json({"error": message});
-}
 
-app.get("/api/votes", function(req, res) {
-  db.collection(VOTES_COLLECTION).find({}).toArray(function(err, docs) {
-    if (err) {
-      handleError(res, err.message, "Failed to get contacts.");
-    } else {
-      res.status(200).json(docs);
-    }
-  });
+//Use our router configuration when we call /api
+app.use('/api', router);
+//starts the server and listens for requests
+app.listen(port, function() {
+ console.log(`api running on port ${port}`);
 });
-
-app.post("/api/votes", function(req, res) {
-  var newVote = req.body;
-  
-  if (!req.body.optionA || !req.body.optionB || !req.body.start || req.body.end) {
-    handleError(res, "Invalid user input", "Must provide all details.", 400);
-  }
-
-  db.collection(VOTES_COLLECTION).insertOne(newVote, function(err, doc) {
-    if (err) {
-      handleError(res, err.message, "Failed to create new contact.");
-    } else {
-      res.status(201).json(doc.ops[0]);
-    }
-  });
-});
-
