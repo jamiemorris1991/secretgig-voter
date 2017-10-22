@@ -1,6 +1,14 @@
 import React, { Component } from 'react';
 import '../styles/voter.css';
 import ReactCountdownClock from 'react-countdown-clock';
+import Responsive from 'react-responsive';  
+
+
+const Desktop = ({ children }) => <Responsive minWidth={992} children={children} />;
+const Tablet = ({ children }) => <Responsive minWidth={768} maxWidth={992} children={children} />;
+const Mobile = ({ children }) => <Responsive maxWidth={768} children={children} />;
+const Default = ({ children }) => <Responsive minWidth={768} children={children} />;
+
 
 export default class Vote extends Component {
   constructor(){
@@ -10,7 +18,8 @@ export default class Vote extends Component {
       bCount: 0,
       startTime: Date.now(),
       duration: 60,
-      isBlocked: false
+      isBlocked: false,
+      status: "No Votes yet!"
     }
   }
 
@@ -27,12 +36,26 @@ export default class Vote extends Component {
   }
 
   handleClick(option) {
-    //option.isFirst ? this.state.a++ : this.state.b++
+    var votes = {
+      a: option.isFirst ? this.state.aCount + 1: this.state.aCount,
+      b:  !option.isFirst ? this.state.bCount + 1 : this.state.bCount,
+      status: ""
+    }
+
+    if (votes.a > votes.b) {
+      votes.status = option.name + " is Winning";
+    } else if (votes.a < votes.b) {
+      votes.status = option.name + " Is Winning";
+    } else if (votes.a === votes.b) {
+      votes.status = "Currently a draw!";
+    }
+    
     this.setState({
-      aCount: option.isFirst ? this.state.aCount + 1: this.state.aCount,
-      bCount: !option.isFirst ? this.state.bCount + 1 : this.state.bCount,
-    })
-    this.blockVote();
+      aCount: votes.a,
+      bCount: votes.b,
+      status: votes.status
+    });
+    // this.blockVote();
   }
 
   blockVote() {
@@ -42,8 +65,24 @@ export default class Vote extends Component {
     }, 30000)
   }
 
+  renderDesktop() {
+    return(
+      <div>
+        <h2 className="status">{this.state.status}</h2>
+      </div>
+    );
+  }
 
   render() {
+    return(
+      <div>
+        <Desktop>{this.renderDesktop()}</Desktop>
+        <Mobile>{this.renderMobile()}</Mobile>
+      </div>
+    );
+  }
+
+  renderMobile() {
     let options = [];
     options.push(this.renderOption({ isFirst: true, name: "Brexit", count:0}));
     options.push(this.renderOption({ isFirst: false, name: "Remain", count:0}));
