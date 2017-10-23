@@ -6,8 +6,8 @@ import Responsive from 'react-responsive';
 const Desktop = ({ children }) => <Responsive minWidth={992} children={children} />;
 const Mobile = ({ children }) => <Responsive maxWidth={768} children={children} />;
 export default class Vote extends Component {
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     this.state = {
       aCount: 0,
       bCount: 0,
@@ -64,6 +64,7 @@ export default class Vote extends Component {
     return(
       <div>
         <h2 className="status">{this.state.status}</h2>
+        <h3>{this.props.vote.optionA} vs. {this.props.vote.optionB}</h3> 
       </div>
     );
   }
@@ -79,8 +80,8 @@ export default class Vote extends Component {
 
   renderMobile() {
     let options = [];
-    options.push(this.renderOption({ isFirst: true, name: "Brexit", count:0}));
-    options.push(this.renderOption({ isFirst: false, name: "Remain", count:0}));
+    options.push(this.renderOption({ isFirst: true, name: this.props.vote.optionA, count:0}));
+    options.push(this.renderOption({ isFirst: false, name: this.props.vote.optionB, count:0}));
 
     return (
         <div>
