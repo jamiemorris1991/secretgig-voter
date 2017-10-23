@@ -50,7 +50,7 @@ export default class Vote extends Component {
       bCount: votes.b,
       status: votes.status
     });
-    // this.blockVote();
+    this.blockVote();
   }
 
   blockVote() {
