@@ -9,14 +9,22 @@ export default class Vote extends Component {
   constructor(props){
     super(props);
     this.state = {
-      aCount: 0,
-      bCount: 0,
-      startTime: Date.now(),
-      duration: 60,
-      isBlocked: false,
-      status: "No Votes yet!"
+      vote: {},
+      // aCount: 0,
+      // bCount: 0,
+      // startTime: Date.now(),
+      // duration: 60,
+      // isBlocked: false,
+      // status: "No Votes yet!"
     }
   }
+
+  // componentDidMount() {
+  //   axios.get(`/votes/` + this.props.vote)
+  //     .then(res => {
+  //       this.setState({ vote });
+  //     });
+  // }
 
   renderOption(option) {
     return (

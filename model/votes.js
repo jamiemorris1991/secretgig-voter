@@ -3,12 +3,13 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var VotesSchema = new Schema({
+  vote: Number,
   optionA: String,
-  OptionB: String,
-  votesForA: String,
-  votesForB: String,
-  start: String,
-  duration: String,
+  optionB: String,
+  votesForA: Number,
+  votesForB: Number,
+  aURL: String,
+  bURL: String
 });
 
 //export our module to use in server.js

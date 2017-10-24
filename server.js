@@ -51,8 +51,17 @@ app.get('/votes', function(req, res) {
   });
 })
 
+app.get('/votes/:id', function(req, res) {
+  Vote.find(function(err, vote) {
+    if (err)
+      res.send(err);
+    res.json(vote)
+  });
+})
+
+
 app.post('/votes', function(req, res) {
-  var vote = new Vote();
+  var vote = req.body.vote;
   vote.optionA  = req.body.optionA;
   vote.OptionB  = req.body.OptionB;
   vote.votesForA  = req.body.votesForA;

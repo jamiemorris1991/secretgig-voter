@@ -8,7 +8,6 @@ export default class Admin extends Component {
     }
   }
 
-
   login() {
     var password = prompt("Enter password", "");
     if (password === null || password === "") {

@@ -4,9 +4,8 @@ import './App.css';
 import Voter from './components/Voter';
 import VoteTable from './components/VoteTable';
 import Winner from './components/Winner';
-import data from './data';
+import axios from 'axios';
 
-//import Admin from './components/Admin';
 class App extends Component {
   constructor() {
     super();
@@ -15,14 +14,23 @@ class App extends Component {
       currentVote: null,
       votingLive: false,
       loggedIn: false,
+      votes: []
     };
   }
 
+  componentDidMount() {
+    axios.get(`/votes`)
+    .then(res => {
+      console.log(res.data);
+      this.setState({votes: res.data});
+    })
+  }
+  
   renderMain() {
       if(this.state.loggedIn){
         return (
         <div>
-           <VoteTable/>
+           <VoteTable votes={this.state.votes}/>
           <h3>Back</h3>
         </div>
        );
@@ -55,7 +63,7 @@ class App extends Component {
     if (password === null || password === "") {
       console.log("nothing entered");
     } else if(password === 'seven') {
-      var voteToStart = data.find((elem) => {
+      var voteToStart = this.votes.find((elem) => {
         return elem.vote === this.state.next
       });
   
@@ -68,27 +76,26 @@ class App extends Component {
        alert("incorrect!");
     }
 
-
     setTimeout( () => {
       this.setState({
         next: this.state.next++ ,
         votingLive : false,
         currentVote: null})
-    }, 60000)
-  }
+    }, 180000)
+ }
 
   render() {
+    console.log(this.state.votes);
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Horror Democracy</h1>
         </header>
         {this.renderMain()}
-        {/*<div className="admin"
+        <div className="admin"
           onClick={this.login.bind(this)}>
           <h3>Admin</h3>
         </div>
-        */}
         <div className="admin"
           onClick={this.startnextVote.bind(this)}>
           <h3>Start Next Vote</h3>

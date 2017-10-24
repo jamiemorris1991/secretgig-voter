@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css'
-
-import votedata from '../data';
-
 export default class VoteTable extends Component {
   handleButtonClick(e, row) {
     console.log(row);
-    var vote = votedata.find((elem) => {
+    var vote = this.props.votes.find((elem) => {
       return elem.vote === row.vote
     });
     this.startVote(vote)
@@ -22,8 +19,6 @@ export default class VoteTable extends Component {
   }
 
   render() {
-    const data = votedata;
-    
     const columns = [{
       Header: 'Vote',
       accessor: 'vote' // String-based value accessors!
@@ -40,7 +35,7 @@ export default class VoteTable extends Component {
 
     return(
         <ReactTable
-          data={data}
+          data={this.props.votes}
           columns={columns}/>
     );
   }
