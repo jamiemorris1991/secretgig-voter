@@ -46,13 +46,13 @@ export default class Vote extends Component {
   sumbitVote(choice) {
     var incrementVote = this.state.vote;
     if (choice === "A") {
-      incrementVote.aCountCount++;
+      incrementVote.votesForA++;
     } else if (choice === "B") {
-      incrementVote.bCountCount++;
+      incrementVote.votesForB++;
     }
-    axios.patch('/votes/' + this.props.vote.vote, {
-      aCount: incrementVote.aCount,
-      bCount: incrementVote.bCount
+    axios.put('/votes/' + this.props.vote.vote, {
+      votesForA: incrementVote.votesForA,
+      votesForB: incrementVote.votesForB
     }).then(function (response) {
       console.log(response);
     })
@@ -66,11 +66,11 @@ export default class Vote extends Component {
     var vote = this.state.vote;
     var status = this.state.status;
 
-    if (vote.aCount > vote.bCount) {
+    if (vote.votesForA > vote.votesForB) {
       status = vote.optionB + " is Winning";
-    } else if (vote.aCount < vote.bCount) {
+    } else if (vote.votesForA < vote.votesForB) {
       status = vote.optionB + " Is Winning";
-    } else if (vote.aCount === vote.bCount) {
+    } else if (vote.votesForA === vote.votesForB) {
       status = "Currently a draw!";
     }
     this.setState({status: status});
@@ -100,12 +100,12 @@ export default class Vote extends Component {
             <div>
               <h2> Voting LIVE</h2>
               <div className="voter">
-                {this.renderOption({ isA: true, name: this.state.vote.optionA, count: this.state.vote.aCount})}
-                {this.renderOption({ isA: false, name: this.state.vote.optionB, count: this.state.vote.bCount})}
+                {this.renderOption({ isA: true, name: this.state.vote.optionA, count: this.state.vote.votesForA})}
+                {this.renderOption({ isA: false, name: this.state.vote.optionB, count: this.state.vote.votesForB})}
               </div>
               <div>
-                votes for A: {this.state.vote.aCount};
-                votes for B: {this.state.vote.bCount};
+                votes for A: {this.state.vote.votesForA};
+                votes for B: {this.state.vote.votesForB};
               </div>
             </div>
           }

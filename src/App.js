@@ -14,7 +14,9 @@ class App extends Component {
       currentVote: null,
       votingLive: false,
       loggedIn: false,
-      votes: []
+      votes: [],
+      winner: 'First Vote starting soon!',
+      winnerURL: 'http://tv.giphy.com/globe'
     };
   }
 
@@ -40,7 +42,7 @@ class App extends Component {
       else return (
        <div>
          <div>NEW VOTE SOON</div>
-         <Winner/>
+         <Winner winner={this.state.winner} url={this.state.winnerURL}/>
        </div>
       );
   }
@@ -75,12 +77,35 @@ class App extends Component {
     }
 
     setTimeout( () => {
+      this.endVote();
       this.setState({
-        next: this.state.next++ ,
         votingLive : false,
-        currentVote: null})
+        currentVote: null
+      })
+      
     }, 180000)
  }
+
+ endVote() {
+  var oldVote = this.state.currentVote;
+
+  if(oldVote.votesForA > oldVote.votesForB) {
+        this.setState({
+          winner: oldVote.optionA,
+          winnerURL: oldVote.aUrl
+        });
+  } else if (oldVote.votesForA < oldVote.votesForB) {
+    this.setState({
+      winner: oldVote.optionA,
+      winnerURL: oldVote.aUrl
+    });
+  } else {
+    this.setState({
+      winner: "It was a draw!!!",
+      winnerURL: 'http://tv.giphy.com/oops'
+    });
+  }
+}
 
   render() {
     return (

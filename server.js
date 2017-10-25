@@ -5,8 +5,7 @@ const bodyParser = require('body-parser')
 const path = require('path');
 const mongoose = require('mongoose');
 
-var Vote = require('./model/votes')
-
+var Vote = require('./model/votes');
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'build')));
@@ -25,10 +24,8 @@ mongoose.connect(mongoDB, { useMongoClient: true })
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-// //now we should configure the API to use bodyParser and look for 
-// //JSON data in the request body
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 //To prevent errors from Cross Origin Resource Sharing, we will set 
 //our headers to allow CORS with middleware like so:
@@ -59,32 +56,40 @@ app.get('/votes/:id', function(req, res) {
   });
 })
 
-app.patch('/votes/:id', function(req, res) {
-  Vote.findById(req.params.id, function(err, vote) {
-    if (err) res.send(err);
-    vote.votesForA = req.body.votesForA;
-    vote.votesForB = req.body.votesForB;
-    vote.save(function(err) {
-      if (err)
-      res.send(err);
-      res.json({ message: 'Vote successfully updated!' });  
-    });
-  });
-})
-// app.post('/votes', function(req, res) {
-//   var vote = req.body.vote;
-//   vote.optionA  = req.body.optionA;
-//   vote.OptionB  = req.body.OptionB;
-//   vote.votesForA  = req.body.votesForA;
-//   vote.votesForB  = req.body.votesForB;
-//   vote.start  = req.body.start;
-//   vote.duration  = req.body.duration;
-//   vote.save(function(err) {
-//     if (err)
-//       res.send(err);
-//     res.json({ message: 'Vote successfully added!' });
-//   });
-// });
+app.put('/votes/:id', function(req, res) {
+  console.log(req.body);
+  Vote.findByIdAndUpdate(
+    req.params.id, 
+    {$set: {'votesForA': req.body.votesForA, 'votesForB': req.body.votesForB}}, 
+    {new: true},
+    function(err,user) {
+      if(err){
+          res.json({error :err}) ; 
+      } else{
+          res.send(user) ; 
+      }
+    }
+  );
+});
+  // Vote.findById(req.params.id, function(err, vote) {
+  //   if (err) 
+  //     res.status(500).send(err);
+  //   else {
+  //     vote.vote = vote.vote;
+  //     vote.optionA = vote.optionA;
+  //     vote.optionB = vote.optionB;
+  //     vote.votesForA = req.body.votesForA || vote.votesForA;
+  //     vote.votesForB = req.body.votesForB || vote.votesForB;
+  //     vote.aURL = vote.aURL;
+  //     vote.bURL =vote.bURL;
+      
+  //     vote.save(function(err) {
+  //       if (err)
+  //         res.status(500).send(err);
+  //       res.status(200).send(vote);
+  //     });
+  //   }
+  // });
 
 app.listen(process.env.PORT || 8080, function() {
   console.log(`api running on port ${process.env.PORT || 8080}`);
