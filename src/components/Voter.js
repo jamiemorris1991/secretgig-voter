@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import '../styles/voter.css';
 import ReactCountdownClock from 'react-countdown-clock';
-import Responsive from 'react-responsive';  
+import Responsive from 'react-responsive';
+import axios from 'axios';
 
 const Desktop = ({ children }) => <Responsive minWidth={992} children={children} />;
 const Mobile = ({ children }) => <Responsive maxWidth={768} children={children} />;
@@ -10,27 +11,24 @@ export default class Vote extends Component {
     super(props);
     this.state = {
       vote: {},
-      // aCount: 0,
-      // bCount: 0,
-      // startTime: Date.now(),
-      // duration: 60,
-      // isBlocked: false,
-      // status: "No Votes yet!"
+      isBlocked: false,
+      status: "No Votes yet!"
     }
   }
 
-  // componentDidMount() {
-  //   axios.get(`/votes/` + this.props.vote)
-  //     .then(res => {
-  //       this.setState({ vote });
-  //     });
-  // }
+  componentDidMount() {
+    axios.get(`/votes/` + this.props.vote.vote)
+      .then(res => {
+        console.log(res);
+        this.setState({ vote: res.data });
+      });
+  }
 
   renderOption(option) {
     return (
       <div>
         <Option
-          isFirst={option.isFirst}
+          isA={option.isA}
           name={option.name}
           onClick={() => this.handleClick(option)}
           />
@@ -39,26 +37,43 @@ export default class Vote extends Component {
   }
 
   handleClick(option) {
-    var votes = {
-      a: option.isFirst ? this.state.aCount + 1: this.state.aCount,
-      b:  !option.isFirst ? this.state.bCount + 1 : this.state.bCount,
-      status: ""
-    }
-
-    if (votes.a > votes.b) {
-      votes.status = option.name + " is Winning";
-    } else if (votes.a < votes.b) {
-      votes.status = option.name + " Is Winning";
-    } else if (votes.a === votes.b) {
-      votes.status = "Currently a draw!";
-    }
-    
-    this.setState({
-      aCount: votes.a,
-      bCount: votes.b,
-      status: votes.status
-    });
+    var choice = option.isA ? "A" : "B";
+    this.sumbitVote(choice);
+    this.updateStatus();
     this.blockVote();
+  }
+
+  sumbitVote(choice) {
+    var incrementVote = this.state.vote;
+    if (choice === "A") {
+      incrementVote.aCountCount++;
+    } else if (choice === "B") {
+      incrementVote.bCountCount++;
+    }
+    axios.patch('/votes/' + this.props.vote.vote, {
+      aCount: incrementVote.aCount,
+      bCount: incrementVote.bCount
+    }).then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+    this.setState({vote: incrementVote});
+  }
+
+  updateStatus() {
+    var vote = this.state.vote;
+    var status = this.state.status;
+
+    if (vote.aCount > vote.bCount) {
+      status = vote.optionB + " is Winning";
+    } else if (vote.aCount < vote.bCount) {
+      status = vote.optionB + " Is Winning";
+    } else if (vote.aCount === vote.bCount) {
+      status = "Currently a draw!";
+    }
+    this.setState({status: status});
   }
 
   blockVote() {
@@ -69,39 +84,28 @@ export default class Vote extends Component {
   }
 
   renderDesktop() {
+    let vote = this.state.vote;
+    console.log(vote);
     return(
       <div>
         <h2 className="status">{this.state.status}</h2>
-        <h3>{this.props.vote.optionA} vs. {this.props.vote.optionB}</h3> 
-      </div>
-    );
-  }
-
-  render() {
-    return(
-      <div>
-        <Desktop>{this.renderDesktop()}</Desktop>
-        <Mobile>{this.renderMobile()}</Mobile>
       </div>
     );
   }
 
   renderMobile() {
-    let options = [];
-    options.push(this.renderOption({ isFirst: true, name: this.props.vote.optionA, count:0}));
-    options.push(this.renderOption({ isFirst: false, name: this.props.vote.optionB, count:0}));
-
     return (
         <div>
           {!this.state.isBlocked  && 
             <div>
               <h2> Voting LIVE</h2>
               <div className="voter">
-                {options}
+                {this.renderOption({ isA: true, name: this.state.vote.optionA, count: this.state.vote.aCount})}
+                {this.renderOption({ isA: false, name: this.state.vote.optionB, count: this.state.vote.bCount})}
               </div>
               <div>
-                votes for A: {this.state.aCount};
-                votes for B: {this.state.bCount};
+                votes for A: {this.state.vote.aCount};
+                votes for B: {this.state.vote.bCount};
               </div>
             </div>
           }
@@ -122,12 +126,22 @@ export default class Vote extends Component {
         </div>
     );
   }
+
+  render() {
+    return(
+      <div>
+        <h3>{this.props.vote.optionA} vs. {this.props.vote.optionB}</h3> 
+        <Desktop>{this.renderDesktop()}</Desktop>
+        <Mobile>{this.renderMobile()}</Mobile>
+      </div>
+    );
+  }
 }
 
 function Option(props) {
     return (
       <button 
-        className={"option" + (props.isFirst ? 'A' : 'B')} 
+        className={"option" + (props.isA ? 'A' : 'B')} 
         onClick= {props.onClick}>
         <div>
           {props.name}

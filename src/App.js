@@ -21,7 +21,6 @@ class App extends Component {
   componentDidMount() {
     axios.get(`/votes`)
     .then(res => {
-      console.log(res.data);
       this.setState({votes: res.data});
     })
   }
@@ -63,10 +62,9 @@ class App extends Component {
     if (password === null || password === "") {
       console.log("nothing entered");
     } else if(password === 'seven') {
-      var voteToStart = this.votes.find((elem) => {
+      var voteToStart = this.state.votes.find((elem) => {
         return elem.vote === this.state.next
       });
-  
       this.setState({ 
         votingLive : true,
         currentVote: voteToStart
@@ -85,7 +83,6 @@ class App extends Component {
  }
 
   render() {
-    console.log(this.state.votes);
     return (
       <div className="App">
         <header className="App-header">

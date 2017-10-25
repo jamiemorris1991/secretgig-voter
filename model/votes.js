@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var VotesSchema = new Schema({
+  _id: Number,
   vote: Number,
   optionA: String,
   optionB: String,

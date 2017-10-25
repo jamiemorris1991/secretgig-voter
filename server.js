@@ -52,28 +52,39 @@ app.get('/votes', function(req, res) {
 })
 
 app.get('/votes/:id', function(req, res) {
-  Vote.find(function(err, vote) {
+  Vote.findById(req.params.id, function(err, vote) {
     if (err)
       res.send(err);
     res.json(vote)
   });
 })
 
-
-app.post('/votes', function(req, res) {
-  var vote = req.body.vote;
-  vote.optionA  = req.body.optionA;
-  vote.OptionB  = req.body.OptionB;
-  vote.votesForA  = req.body.votesForA;
-  vote.votesForB  = req.body.votesForB;
-  vote.start  = req.body.start;
-  vote.duration  = req.body.duration;
-  vote.save(function(err) {
-    if (err)
+app.patch('/votes/:id', function(req, res) {
+  Vote.findById(req.params.id, function(err, vote) {
+    if (err) res.send(err);
+    vote.votesForA = req.body.votesForA;
+    vote.votesForB = req.body.votesForB;
+    vote.save(function(err) {
+      if (err)
       res.send(err);
-    res.json({ message: 'Vote successfully added!' });
+      res.json({ message: 'Vote successfully updated!' });  
+    });
   });
-});
+})
+// app.post('/votes', function(req, res) {
+//   var vote = req.body.vote;
+//   vote.optionA  = req.body.optionA;
+//   vote.OptionB  = req.body.OptionB;
+//   vote.votesForA  = req.body.votesForA;
+//   vote.votesForB  = req.body.votesForB;
+//   vote.start  = req.body.start;
+//   vote.duration  = req.body.duration;
+//   vote.save(function(err) {
+//     if (err)
+//       res.send(err);
+//     res.json({ message: 'Vote successfully added!' });
+//   });
+// });
 
 app.listen(process.env.PORT || 8080, function() {
   console.log(`api running on port ${process.env.PORT || 8080}`);
